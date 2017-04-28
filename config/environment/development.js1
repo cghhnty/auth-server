@@ -1,0 +1,38 @@
+'use strict';
+
+// Development specific configuration
+// ==================================
+module.exports = {
+    server: {
+        'localhost': {
+            listen: '',
+            unless: [ // Conditionally skip a request when a condition is met.
+                {
+                    url: '',// String or RegExp
+                    body: '',// String or RegExp
+                    methods: ["GET", "POST"]// HTTP Methods
+                }
+            ],
+            client: {
+                fetchById: function (id, callback) {
+
+                }
+            },
+            location: [{
+                url: /^\/saas\//,// String or RegExp
+                body: /['"]method['"]\s*:\s*["'](activeLakalaStoreByDeviceKey|getLakalaStoreByDeviceKey|getStore)["']/, // String or RegExp
+                methods: ["GET", "POST"],// Accept HTTP Methods
+                proxy_pass: 'url', // http|https://hostname:port/path
+                proxy_set_header: [{'key': 'value'}],
+                unless: [ // Conditionally skip a request when a condition is met.
+                    {
+                        url: '',// String or RegExp
+                        body: '',// String or RegExp
+                        methods: ["GET", "POST"]// HTTP Methods
+                    }
+                ]
+            }]
+        }
+    }
+};
+

@@ -1,0 +1,24 @@
+{
+  "name": "auth-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.5.0",
+    "commander": "^2.9.0",
+    "lodash": "^3.10.1",
+    "log4js": "^0.6.27",
+    "raw-body": "^2.1.4",
+    "redis": "^2.3.0",
+    "string_decoder": "^0.10.31"
+  },
+  "devDependencies": {
+    "should": "^7.1.1",
+    "supertest": "^1.1.0"
+  }
+}
