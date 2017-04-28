@@ -1,0 +1,165 @@
+post：请求参数是在http标题的一个不同部分（名为entity body）传输的，这一部分用来传输表单信息，因此必须将Content-type设置为:application/x-www-form- urlencoded。post设计用来支持web窗体上的用户字段，其参数也是作为key/value对传输。
+
+Windows 下单机最大TCP连接数
+调整系统参数来调整单机的最大TCP连接数，Windows 下单机的TCP连接数有多个参数共同决定：
+以下都是通过修改注册表[HKEY_LOCAL_MACHINE \System \CurrentControlSet \Services \Tcpip \Parameters]
+ 
+1.最大TCP连接数      TcpNumConnections
+2.TCP关闭延迟时间    TCPTimedWaitDelay    (30-240)s
+3.最大动态端口数   MaxUserPort  (Default = 5000, Max = 65534) TCP客户端和服务器连接时，客户端必须分配一个动态端口，默认情况下这个动态端口的分配范围为 1024-5000 ，也就是说默认情况下，客户端最多可以同时发起3977 Socket 连接
+4.最大TCB 数量   MaxFreeTcbs
+系统为每个TCP 连接分配一个TCP 控制块(TCP control block or TCB)，这个控制块用于缓存TCP连接的一些参数，每个TCB需要分配 0.5 KB的pagepool 和 0.5KB 的Non-pagepool，也就说，每个TCP连接会占用 1KB 的系统内存。
+非Server版本，MaxFreeTcbs 的默认值为1000 （64M 以上物理内存）Server 版本，这个的默认值为 2000。也就是说，默认情况下，Server 版本最多同时可以建立并保持2000个TCP 连接。
+5. 最大TCB Hash table 数量   MaxHashTableSize TCB 是通过Hash table 来管理的。
+这个值指明分配 pagepool 内存的数量，也就是说，如果MaxFreeTcbs = 1000 , 则 pagepool 的内存数量为 500KB那么 MaxHashTableSize 应大于 500 才行。这个数量越大，则Hash table 的冗余度就越高，每次分配和查找 TCP  连接用时就越少。这个值必须是2的幂，且最大为65536.
+ 
+IBM WebSphere Voice Server 在windows server 2003 下的典型配置
+MaxUserPort = 65534 (Decimal)
+MaxHashTableSize = 65536 (Decimal)
+MaxFreeTcbs = 16000 (Decimal)
+这里我们可以看到 MaxHashTableSize 被配置为比MaxFreeTcbs 大4倍，这样可以大大增加TCP建立的速度
+这样就可以通过一个 Socket 实例唯一代表一个主机上的一个应用程序的通信链路了。
+报文发送和接收是同步进行，既报文发送后等待接收返回报文。 同步方式一般需要考虑超时问题，即报文发出去后不能无限等待，需要设定超时时间，超过该时间发送方不再等待读返回报文，直接通知超时返回。 
+HTTP也可以建立长连接的，使用Connection:keep-alive，HTTP 1.1默认进行持久连接。HTTP1.1和HTTP1.0相比较而言，最大的区别就是增加了持久连接支持(貌似最新的 http1.0 可以显示的指定 keep-alive),但还是无状态的，或者说是不可以信任的。
+长连接多用于操作频繁，点对点的通讯，而且连接数不能太多情况，。每个TCP连接都需要三步握手，这需要时间，如果每个操作都是先连接，再操作的话那么处理速度会降低很多，所以每个操作完后都不断开，次处理时直接发送数据包就OK了，不用建立TCP连接。例如：数据库的连接用长连接， 如果用短连接频繁的通信会造成socket错误，而且频繁的socket 创建也是对资源的浪费。 
+为什么建立连接是三次握手，而关闭连接却是四次挥手呢
+当一个新的域名连同其 TCP/IP 地址一同注册后，全世界的 DNS 服务器都会对此信息进行更新。
+Enumeration enumeration = request.getParameterNames();
+但是：它不支持复杂数据类型，因为post没有定义传输数据结构的语义和规则。
+请求请求行（request line）、请求头部（header）、空行和请求数据四个部分组成。
+请求行：方式+urI+协议
+HTTP响应也由四个部分组成，分别是：状态行、消息报头、空行和响应正文。
+状态行：协议+状态码+状态消息(ok)
+Uniform Resource Identifiers, URI
+URL,全称是Uniform Resource Locator
+200 OK                        //客户端请求成功
+400 Bad Request               //客户端请求有语法错误，不能被服务器所理解
+401 Unauthorized              //请求未经授权，这个状态代码必须和WWW-Authenticate报头域一起使用 
+403 Forbidden                 //服务器收到请求，但是拒绝提供服务
+404 Not Found                 //请求资源不存在，eg：输入了错误的URL
+500 Internal Server Error     //服务器发生不可预期的错误
+503 Server Unavailable        //服务器当前不能处理客户端的请求，一段时间后可能恢复正常
+HTTP请求方法
+根据HTTP标准，HTTP请求可以使用多种请求方法。
+HTTP1.0定义了三种请求方法： GET, POST 和 HEAD方法。
+HTTP1.1新增了五种请求方法：OPTIONS, PUT, DELETE, TRACE 和 CONNECT 方法。
+
+GET     请求指定的页面信息，并返回实体主体。
+HEAD     类似于get请求，只不过返回的响应中没有具体的内容，用于获取报头
+POST     向指定资源提交数据进行处理请求（例如提交表单或者上传文件）。数据被包含在请求体中。POST请求可能会导致新的资源的建立和/或已有资源的修改。
+PUT     从客户端向服务器传送的数据取代指定的文档的内容。
+DELETE      请求服务器删除指定的页面。
+CONNECT     HTTP/1.1协议中预留给能够将连接改为管道方式的代理服务器。
+OPTIONS     允许客户端查看服务器的性能。
+TRACE     回显服务器收到的请求，主要用于测试或诊断。
+
+
+Node执行在单线程上，一旦单线程出现未捕获的异常，就会造成这个进程crash。所以就遇到了第二个问题：“如何保证进程的健壮性和稳定性？”
+单线程（针对自己的代码），异步，事件循环
+从严格意义上来讲，Node其实并不是真正的单线程架构，因为Node自身还有I/O线程存在（网络I/O、磁盘I/O），这些I/O线程是由更底层的libuv处理，这部分线程对于JavaScript开发者来说是透明的。JavaScript代码永远运行在V8上，是单线程的。所以表面上来看NodeJS是单线程的。
+从一个进程处理一个请求改为一个线程处理一个请求。线程相对于进程的开销要小许多，而且线程之间可以共享数据。此外可以利用线程池来减少创建和销毁线程的开销。
+基于epoll（效率最高的I/O事件通知机制）的事件驱动模型出现了。采用单线程避免了不必要的内存开销和上下文切换开销。
+
+DNS 和 主机表
+方便局域网用户 
+
+控制变量延迟
+@setlocal set num=0&&echo %num%
+setlocal enabledelayedexpansion
+
+
+/usr/bin/supervisord -- supervisor 服务守护进程
+/usr/bin/supervisorctl -- supervisor 控制台进程
+/etc/supervisord.conf
+supervisor配置：
+/etc/supervisor/
+启动：
+supervisord -c /etc/supervisord.conf
+find /usr/bin  -name supervisor*
+
+http://postest.lakala.com.cn/MP_verify_hIceTlNyFU0gOtDa.txt
+
+添加input记录： iptables -A INPUT -p tcp --dport 22 -j ACCEPT   
+添加output记录： iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT   
+最后注意需要再执行一下 /etc/init.d/iptables save，这样这两条语句就保存到刚才那个/etc/sysconfig/iptables 文件中了。  
+service iptables restart
+
+ssh-keygen -t rsa -C "cghhnty@1361339802@qq.com"
+
+
+java要指定编码解析请求
+
+mongo分片
+
+
+TCP[1]  ：Transmission Control Protocol传输控制协议,基于字节流的传输层（Transport layer）通信协议
+UDP[1]  :User Datagram Protocol用户数据报协议
+端口号只有整数，范围是从0 到65535（2^16-1）
+每一个 TCP 连接都必须由一端（通常为 client )发起请求，这个 port 通常是随机选择大于 1024 以上（因为0-1023一般被用作知名服务器的端口，被预定，如FTP、HTTP、SMTP等）的 port 号来进行
+
+计算机之间相互通信的时候，分为两种方式：一种是发送信息以后，可以确认信息是否到达，也就是有应答的方式，这种方式大多采用TCP协议；一种是发送以后就不管了，不去确认信息是否到达，这种方式大多采用UDP协议。对应这两种协议的服务提供的端口，也就分为TCP端口和UDP端口。
+
+TCP端口和UDP端口。由于TCP和UDP 两个协议是独立的，因此各自的端口号也相互独立，比如TCP有235端口，UDP也 可以有235端口，两者并不冲突
+打电话和写信
+
+export是对象，只能加属性
+不能显示函数具体情况
+
+要重启，你可以使用restart选项，如果服务在运行中，它将重启服务；如果服务不在运行中，它将会启动。你也可以使用try-start选项，它只会在服务已经在运行中的时候重启服务。同时，reload选项你也可以有，它会重新加载配置文件。
+# systemctl restart httpd.service
+# systemctl try-restart httpd.service
+# systemctl reload httpd.service
+
+
+要检查服务状态，你可以使用status选项，看这里：
+# systemctl status httpd.service
+它会告诉你运行中的服务的方方面面。
+使用启用/禁用服务来控制开机启动
+你也可以使用enable/disable选项来控制一个服务是否开机启动，命令如下：
+# systemctl enable httpd.service
+# systemctl disable httpd.service
+
+OSI（开放系统互联参考模型，Open System Interconnection Reference Model）七层协议可知
+由于TCP/IP传输层的TCP和UDP两个协议是两个完全独立的软件模块，因此各自的端口号也相互独立。如TCP有一个255号端口，UDP也可以有一个255号端口，两者并不冲突。
+TCP和UDP规定，小于256的端口才能作为保留端口。
+
+端口：23
+服务：Telnet
+说明：远程登录，入侵者在搜索远程登录UNIX的服务。大多数情况下扫描这一端口是为了找到机器运行的操作系统。还有使用其他技术，入侵者也会找到密码。木马Tiny Telnet Server就开放这个端口。
+端口：25
+服务：SMTP
+说明：SMTP服务器所开放的端口，用于发送邮件。入侵者寻找SMTP服务器是为了传递他们的SPAM。入侵者的帐户被关闭，他们需要连接到高带宽的E-MAIL服务器上，将简单的信息传递到不同的地址。木马Antigen、Email Password Sender、Haebu Coceda、Shtrilitz Stealth、WinPC、WinSpy都开放这个端口。
+
+端口：110
+服务：Post Office Protocol -Version3
+说明：POP3服务器开放此端口，用于接收邮件，客户端访问服务器端的邮件服务。POP3服务有许多公认的弱点。关于用户名和密码交 换缓冲区溢出的弱点至少有20个，这意味着入侵者可以在真正登陆前进入系统。成功登陆后还有其他缓冲区溢出错误。
+
+
+建立起一个TCP连接需要经过“三次握手”：
+第一次握手：客户端发送syn包(syn=j)到服务器，并进入SYN_SEND状态，等待服务器确认；
+第二次握手：服务器收到syn包，必须确认客户的SYN（ack=j+1），同时自己也发送一个SYN包（syn=k），即SYN+ACK包，此时服务器进入SYN_RECV状态；
+第三次握手：客户端收到服务器的SYN＋ACK包，向服务器发送确认包ACK(ack=k+1)，此包发送完毕，客户端和服务器进入ESTABLISHED状态，完成三次握手 握手过程中传送的包里不包含数据，三次握手完毕后，客户端与服务器才正式开始传送数据。
+断开连接时服务器和客户端均可以主动发起断开TCP连接的请求，断开过程需要经过“四次握手”
+
+由于HTTP在每次请求结束后都会主动释放连接，因此HTTP连接是一种“短连接”，要保持客户端程序的在线状态，需要不断地向服务器发起连接请求。
+
+创建Socket连接时，可以指定使用的传输层协议，Socket可以支持不同的传输层协议（TCP或UDP），当使用TCP协议进行连接时，该Socket连接就是一个TCP连接。
+socket则是对TCP/IP协议的封装和应用（程序员层面上）。也可以说，TPC/IP协议是传输层协议，主要解决数据 如何在网络中传输，而HTTP是应用层协议，主要解决如何包装数据。关于TCP/IP和HTTP协议的关系，网络有一段比较容易理解的介绍：
+“我们在传输数据时，可以只使用（传输层）TCP/IP协议，但是那样的话，如 果没有应用层，便无法识别数据内容，如果想要使传输的数据有意义，则必须使用到应用层协议，应用层协议有很多，比如HTTP、FTP、TELNET等，也 可以自己定义应用层协议。WEB使用HTTP协议作应用层协议，以封装HTTP文本信息，然后使用TCP/IP做传输层协议将它发到网络上。”
+我们平时说的最多的socket是什么呢，实际上socket是对TCP/IP协议的封装，Socket本身并不是协议，而是一个调用接口（API），通过Socket，我们才能使用TCP/IP协议
+ 实际上，Socket跟TCP/IP协议没有必然的联系。Socket编程接口在设计的时候，就希望也能适应其他的网络协议。所以说，Socket的出现 只是使得程序员更方便地使用TCP/IP协议栈而已，是对TCP/IP协议的抽象，从而形成了我们知道的一些最基本的函数接口，比如create、 listen、connect、accept、send、read和write等等。网络有一段关于socket和TCP/IP协议关系的说法比较容易理解：
+“TCP/IP只是一个协议栈，就像操作系统的运行机制一样，必须要具体实现，同时还要提供对外的操作接口。这个就像操作系统会提供标准的编程接口，比如win32编程接口一样，TCP/IP也要提供可供程序员做网络开发所用的接口，这就是Socket编程接口
+
+实际上，传输层的TCP是基于网络层的IP协议的，而应用层的HTTP协议又是基于传输层的TCP协议的，而Socket本身不算是协议，就像上面所说，它只是提供了一个针对TCP或者UDP编程的接口。socket是对端口通信开发的工具,它要更底层一些.
+
+
+首先注意usr 指 Unix System Resource
+
+首先注意usr 指 Unix System Resource，而不是User
+然后通常/usr/bin下面的都是系统预装的可执行程序，会随着系统升级而改变
+/usr/local/bin目录是给用户放置自己的可执行程序的地方，推荐放在这里，不会被系统升级而覆盖同名文件
+
+如果两个目录下有相同的可执行程序，谁优先执行受到PATH环境变量的影响，比如我的一台服务器的PATH变量为
+echo $PATH 
+/usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/home/dean/bin 
+这里/usr/local/bin优先于/usr/bin, 一般都是如此
